@@ -1,0 +1,82 @@
+#include "thingProperties.h"
+#include <Servo.h>
+
+// global variables
+Servo Myservo;
+int pos=0;
+int posi=0;
+
+void setup() {
+  // Initialize serial and wait for port to open:
+  Serial.begin(9600);
+  // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
+  delay(1500); 
+  
+  // internal LED
+  pinMode(LED_BUILTIN, OUTPUT);
+  
+  // servo to pin 3
+  pinMode(2,INPUT);
+  Myservo.write(pos); // init servo to 0 position
+  Myservo.attach(3);  // attach to pin 3
+
+  // Defined in thingProperties.h
+  initProperties();
+
+  // Connect to Arduino IoT Cloud
+  ArduinoCloud.begin(ArduinoIoTPreferredConnection);
+  
+  /*
+     The following function allows you to obtain more information
+     related to the state of network and IoT Cloud connection and errors
+     the higher number the more granular information you’ll get.
+     The default is 0 (only errors).
+     Maximum is 4
+ */
+  setDebugMessageLevel(2);
+  ArduinoCloud.printDebugInfo();
+}
+
+void loop() {
+  ArduinoCloud.update();
+  // Your code here 
+  //Serial.print("Hello World!");
+}
+
+/*
+  Since OnButton is READ_WRITE variable, onOnButtonChange() is
+  executed every time a new value is received from IoT Cloud.
+*/
+
+void onOnButtonChange()  {
+  // Add your code here to act upon OnButton change
+  //pos = Myservo.read();
+  
+  if (onButton == 1){
+    //Myservo.attach(3);
+    digitalWrite(LED_BUILTIN, HIGH);
+    for (pos; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+      // in steps of 1 degree
+      Myservo.write(pos);              // tell servo to go to position in variable 'pos'
+      Serial.println(pos);
+      delay(15);                       // waits 15ms for the servo to reach the position
+    }
+    //Myservo.detach();     // remove servo from pin 3
+    //Myservo.write(60);
+      //delay(12 * 60 * 60 * 1000);
+      //delay(1000);
+  }
+  else {
+    //Myservo.attach(3);    // attach servo back to pin 3
+    digitalWrite(LED_BUILTIN, LOW);
+    for (pos; pos >= 0; pos -= 1) {     // goes from 180 degrees to 0 degrees
+      Myservo.write(pos);               // tell servo to go to position in variable 'pos'
+      Serial.println(pos);
+      delay(15);          // waits 15ms for the servo to reach the position
+      //Myservo.detach();   // remove servo from pin 3
+    }
+  }
+    //Myservo.write(-60);
+}
+
+
